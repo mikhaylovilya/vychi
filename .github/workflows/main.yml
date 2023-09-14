@@ -40,7 +40,10 @@ jobs:
     # - run: sudo apt install software-properties-common --yes
     # - run: sudo apt update
       # - run: eval $(opam env)
-      - run: cd vychi1
-      - run: opam install . --deps-only --with-test
+      - run: ls
+      - run: cd ./vychi1/
+      - run: ls
+      - run: opam install . --deps-only
+      - run: opam pin add . --yes
       - run: opam exec -- dune build
       - run: opam exec -- dune runtest
