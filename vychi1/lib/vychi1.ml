@@ -1,60 +1,6 @@
-(* #12 *)
-
-(* type expr =
-  | Const of int
-  | Plus of expr * expr
-  | Slash of expr * expr
-  | Asterisk of expr * expr
-  | Var of string
-
-module type MONAD = sig
-  type 'a t
-
-  val return : 'a -> 'a t
-  val ( >>= ) : 'a t -> ('a -> 'b t) -> 'b t
-
-  module Syntax : sig
-    (* A synonym for >>= *)
-    val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
-  end
-end
-
-module type MONADERROR = sig
-  include MONAD
-
-  val fail : string -> 'a t
-end
-
-module Eval (M : MONADERROR) = struct
-  open M
-  open M.Syntax
-
-  let eval from_env : expr -> int M.t =
-    let rec helper = function
-      | Const n -> return n
-      | Plus (l, r) ->
-        let* l = helper l in
-        let* r = helper r in
-        return (l + r)
-      | Asterisk (l, r) ->
-        (* helper l >>= fun l -> *)
-        let* l = helper l in
-        let* r = helper r in
-        return (l * r)
-      | Slash (l, r) ->
-        let* r = helper r in
-        if r = 0
-        then fail "division by zero"
-        else
-          let* l = helper l in
-          return (l / r)
-      | Var s -> from_env s
-    in
-    helper
-  ;;
-end *)
-
 open Base
+
+let debug = false
 
 module Eval = struct
   type f = float -> float
@@ -76,7 +22,7 @@ module Eval = struct
     ; epsilon : float
     }
 
-  let get_middle interval = (interval.right_b -. interval.left_b) /. 2.
+  let get_middle interval = (interval.right_b +. interval.left_b) /. 2.
 
   let root_separation f interval split_count =
     let h = (interval.right_b -. interval.left_b) /. Int.to_float split_count in
@@ -100,6 +46,9 @@ module Eval = struct
       { interval with right_b = middle }, { interval with left_b = middle }
     in *)
     let rec loop f interval epsilon =
+      (* let () =
+        if debug then Caml.Format.printf "a: %f, b: %f\n" interval.left_b interval.right_b
+      in *)
       let middle = get_middle interval in
       let halved_interval =
         if Float.( <= ) (f interval.left_b *. f middle) 0.
@@ -126,11 +75,11 @@ module V_Pprint = struct
     then
       interval_list
       |> List.iter ~f:(fun ({ left_b; right_b } : Eval.interval) ->
-           Caml.Format.printf "(%.8f, %.8f) " left_b right_b)
+           Caml.Format.printf "(%.9f, %.9f) " left_b right_b)
   ;;
 
   let log_ans debug (answer : Eval.answer) =
-    if debug then Caml.Format.printf "x: %.8f; delta: %.8f\n" answer.x answer.delta
+    if debug then Caml.Format.printf "x: %.9f; delta: %.9f\n" answer.x answer.delta
   ;;
 
   let log_ans_list debug (answer_list : Eval.answer list) =
@@ -138,7 +87,7 @@ module V_Pprint = struct
     then
       answer_list
       |> List.iter ~f:(fun ({ x; delta } : Eval.answer) ->
-           Caml.Format.printf "(x: %.8f; delta: %.8f) " x delta)
+           Caml.Format.printf "(x: %.9f; delta: %.9f) " x delta)
   ;;
 end
 
@@ -147,8 +96,6 @@ let float_equal_precision f1 f2 precision =
   then true
   else Float.equal f1 f2
 ;;
-
-let debug = false
 
 let%test "root_sep_test1" =
   let conf : Eval.conf =
@@ -171,8 +118,8 @@ let%test "root_sep_test1" =
   in
   List.equal
     (fun (int1 : Eval.interval) (int2 : Eval.interval) ->
-      float_equal_precision int1.left_b int2.left_b 8
-      && float_equal_precision int1.right_b int2.right_b 8)
+      float_equal_precision int1.left_b int2.left_b 9
+      && float_equal_precision int1.right_b int2.right_b 9)
     res
     expected_res
 ;;
@@ -186,11 +133,11 @@ let%test "bisect_test1" =
     }
   in
   let res = Eval.bisect conf.f { left_b = -2.400000; right_b = -2.200000 } conf.epsilon in
-  let expected_res : Eval.answer = { x = 2.18437500; delta = -0.07187500 } in
+  let expected_res : Eval.answer = { x = -2.236067981; delta = 0.000000006 } in
   let () = V_Pprint.log_ans debug res in
   let () = V_Pprint.log_ans debug expected_res in
-  float_equal_precision res.x expected_res.x 8
-  && float_equal_precision res.delta expected_res.delta 8
+  float_equal_precision res.x expected_res.x 9
+  && float_equal_precision res.delta expected_res.delta 9
 ;;
 
 let%test "bisect_method_test1" =
@@ -202,7 +149,11 @@ let%test "bisect_method_test1" =
     }
   in
   let res = Eval.bisect_method conf in
-  let expected_res : Eval.answer list = [] in
+  let expected_res : Eval.answer list =
+    [ { x = -2.235717773; delta = 0.000610352 }
+    ; { x = 2.235717773; delta = 0.000610352 }
+    ]
+  in
   let () =
     match res with
     | [] -> Caml.Format.printf "No roots\n"
@@ -212,24 +163,6 @@ let%test "bisect_method_test1" =
     (fun (int1 : Eval.answer) (int2 : Eval.answer) ->
       float_equal_precision int1.x int2.x 8
       && float_equal_precision int1.delta int2.delta 8)
-    res
-    expected_res
-;;
-
-let%test "float_record_test1" =
-  let res : Eval.interval list =
-    [ { left_b = -2.400000; right_b = -2.200000 }
-    ; { left_b = 2.200000; right_b = 2.400000 }
-    ]
-  in
-  let expected_res : Eval.interval list =
-    [ { left_b = -2.400000; right_b = -2.200000 }
-    ; { left_b = 2.200000; right_b = 2.400000 }
-    ]
-  in
-  List.equal
-    (fun (int1 : Eval.interval) (int2 : Eval.interval) ->
-      Float.equal int1.left_b int2.left_b && Float.equal int1.right_b int2.right_b)
     res
     expected_res
 ;;
