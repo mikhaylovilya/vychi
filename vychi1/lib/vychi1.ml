@@ -130,7 +130,15 @@ module V_Pprint = struct
   ;;
 
   let log_ans debug (answer : Eval.answer) =
-    if debug then Caml.Format.printf "x: %.8f, delta: %.8f\n" answer.x answer.delta
+    if debug then Caml.Format.printf "x: %.8f; delta: %.8f\n" answer.x answer.delta
+  ;;
+
+  let log_ans_list debug (answer_list : Eval.answer list) =
+    if debug
+    then
+      answer_list
+      |> List.iter ~f:(fun ({ x; delta } : Eval.answer) ->
+           Caml.Format.printf "(x: %.8f; delta: %.8f) " x delta)
   ;;
 end
 
@@ -183,6 +191,29 @@ let%test "bisect_test1" =
   let () = V_Pprint.log_ans debug expected_res in
   float_equal_precision res.x expected_res.x 8
   && float_equal_precision res.delta expected_res.delta 8
+;;
+
+let%test "bisect_method_test1" =
+  let conf : Eval.conf =
+    { f = (fun x -> (x **. 2.) -. 5.)
+    ; interval = { left_b = -5.; right_b = 5. }
+    ; split_count = 2
+    ; epsilon = 1.E-3
+    }
+  in
+  let res = Eval.bisect_method conf in
+  let expected_res : Eval.answer list = [] in
+  let () =
+    match res with
+    | [] -> Caml.Format.printf "No roots\n"
+    | lst -> lst |> V_Pprint.log_ans_list debug
+  in
+  List.equal
+    (fun (int1 : Eval.answer) (int2 : Eval.answer) ->
+      float_equal_precision int1.x int2.x 8
+      && float_equal_precision int1.delta int2.delta 8)
+    res
+    expected_res
 ;;
 
 let%test "float_record_test1" =
