@@ -113,21 +113,44 @@ module Eval = struct
     in
     loop f interval epsilon
   ;;
-end
 
-module V_Pprint = struct
-  let log (interval_list : Eval.interval list) =
-    interval_list
-    |> List.iter ~f:(fun ({ left_b; right_b } : Eval.interval) ->
-         Caml.Format.printf "(%f, %f) " left_b right_b)
+  let bisect_method conf =
+    let partition = root_separation conf.f conf.interval conf.split_count in
+    partition |> List.map ~f:(fun int -> bisect conf.f int conf.epsilon)
   ;;
 end
 
+module V_Pprint = struct
+  let log_interv_list debug (interval_list : Eval.interval list) =
+    if debug
+    then
+      interval_list
+      |> List.iter ~f:(fun ({ left_b; right_b } : Eval.interval) ->
+           Caml.Format.printf "(%.8f, %.8f) " left_b right_b)
+  ;;
+
+  let log_ans debug (answer : Eval.answer) =
+    if debug then Caml.Format.printf "x: %.8f, delta: %.8f\n" answer.x answer.delta
+  ;;
+end
+
+let float_equal_precision f1 f2 precision =
+  if Float.( < ) (Float.abs (f1 -. f2)) (1. **. (-1. *. Int.to_float precision))
+  then true
+  else Float.equal f1 f2
+;;
+
+let debug = false
+
 let%test "root_sep_test1" =
-  let f1 x = (x **. 2.) -. 5. in
-  let interval1 : Eval.interval = { left_b = -5.; right_b = 5. } in
-  let split_count1 = 50 in
-  let res = Eval.root_separation f1 interval1 split_count1 in
+  let conf : Eval.conf =
+    { f = (fun x -> (x **. 2.) -. 5.)
+    ; interval = { left_b = -5.; right_b = 5. }
+    ; split_count = 50
+    ; epsilon = 1.E-8
+    }
+  in
+  let res = Eval.root_separation conf.f conf.interval conf.split_count in
   let expected_res : Eval.interval list =
     [ { left_b = -2.400000; right_b = -2.200000 }
     ; { left_b = 2.200000; right_b = 2.400000 }
@@ -136,13 +159,30 @@ let%test "root_sep_test1" =
   let () =
     match res with
     | [] -> Caml.Format.printf "No roots\n"
-    | lst -> lst |> V_Pprint.log
+    | lst -> lst |> V_Pprint.log_interv_list debug
   in
   List.equal
     (fun (int1 : Eval.interval) (int2 : Eval.interval) ->
-      Float.equal int1.left_b int2.left_b && Float.equal int1.right_b int2.right_b)
+      float_equal_precision int1.left_b int2.left_b 8
+      && float_equal_precision int1.right_b int2.right_b 8)
     res
     expected_res
+;;
+
+let%test "bisect_test1" =
+  let conf : Eval.conf =
+    { f = (fun x -> (x **. 2.) -. 5.)
+    ; interval = { left_b = -5.; right_b = 5. }
+    ; split_count = 50
+    ; epsilon = 1.E-8
+    }
+  in
+  let res = Eval.bisect conf.f { left_b = -2.400000; right_b = -2.200000 } conf.epsilon in
+  let expected_res : Eval.answer = { x = 2.18437500; delta = -0.07187500 } in
+  let () = V_Pprint.log_ans debug res in
+  let () = V_Pprint.log_ans debug expected_res in
+  float_equal_precision res.x expected_res.x 8
+  && float_equal_precision res.delta expected_res.delta 8
 ;;
 
 let%test "float_record_test1" =
