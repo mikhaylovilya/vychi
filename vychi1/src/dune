@@ -1,0 +1,18 @@
+(env
+ (dev
+  (flags
+   (:standard -w -32-3))))
+
+(library
+ (name root_eval)
+ (libraries base)
+ (inline_tests)
+ (modules root_eval)
+ (preprocess
+  (pps ppx_inline_test)))
+
+(executable
+ (name main)
+ (public_name vychi1)
+ (modules main)
+ (libraries root_eval base))

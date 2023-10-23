@@ -1,9 +1,0 @@
-(env
- (dev
-  (flags
-   (:standard -w -32-3))))
-
-(executable
- (name main)
- (public_name vychi1)
- (libraries vychi1 base))
