@@ -5,22 +5,23 @@
 (generate_opam_files true)
 
 (source
- (github username/reponame))
+ (github mikhaylovilya/vychi))
 
-(authors "Author Name")
+(authors "Ilya Mikhaylov")
 
-(maintainers "Maintainer Name")
+(maintainers "Ilya Mikhaylov")
 
-(license LICENSE)
+(license MIT)
 
-(documentation https://url/to/documentation)
+(documentation https://github.com/mikhaylovilya/vychi/blob/main/README.md)
 
 (package
  (name vychi1)
- (synopsis "A short synopsis")
- (description "A longer description")
+ (synopsis
+  "Code for homework assignments in course \"Methods of Computation and Computational Workshop\"")
+ (description
+  "Code for homework assignments in course \"Methods of Computation and Computational Workshop\"")
  (depends ocaml dune base ppx_inline_test)
- (tags
-  (topics "to describe" your project)))
+ (tags (ocaml)))
 
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project
