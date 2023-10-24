@@ -40,6 +40,7 @@ let%test "bisect_test1" =
     ; last_interv = Some { left_b = -2.236067986; right_b = -2.236067975 }
     ; approx_root = -2.236067981
     ; delta = 0.000000006
+    ; disc = 0.000000014
     }
   in
   let () = Log.ans_list debug [ res ] in
@@ -58,6 +59,7 @@ let%test "bisect_method_test1" =
       ; last_interv = Some { left_b = -2.236067986; right_b = -2.236067975 }
       ; approx_root = -2.236067981
       ; delta = 0.000000006
+      ; disc = 0.000000014
       }
     ; { meth = Bisect
       ; initial_root = 2.300000000
@@ -65,6 +67,7 @@ let%test "bisect_method_test1" =
       ; last_interv = Some { left_b = 2.236067975; right_b = 2.236067986 }
       ; approx_root = 2.236067981
       ; delta = 0.000000006
+      ; disc = 0.000000014
       }
     ]
   in
@@ -90,6 +93,7 @@ let%test "newton_test1" =
     ; last_interv = None
     ; approx_root = -2.236067977
     ; delta = 0.000000000
+    ; disc = 0.
     }
   in
   let () = Log.ans_list debug [ res ] in
@@ -107,6 +111,7 @@ let%test "newton_method_test1" =
       ; last_interv = None
       ; approx_root = -2.236067977
       ; delta = 0.000000000
+      ; disc = 0.
       }
     ; { meth = Newton
       ; initial_root = 2.300000000
@@ -114,6 +119,7 @@ let%test "newton_method_test1" =
       ; last_interv = None
       ; approx_root = 2.236067977
       ; delta = 0.000000000
+      ; disc = 0.
       }
     ]
   in
@@ -138,7 +144,8 @@ let%test "mod_newton_test1" =
     ; iters = 5
     ; last_interv = None
     ; approx_root = -2.236067978
-    ; delta = 0.000000000
+    ; delta = 0.000000001
+    ; disc = 0.
     }
   in
   let () = Log.ans_list debug [ res ] in
@@ -150,19 +157,73 @@ let%test "mod_newton_method_test1" =
   let () = Log.str "mod_newton_method_test1:" in
   let res = Eval.mod_newton_method conf in
   let expected_res : answer list =
-    [ { meth = Bisect
+    [ { meth = Newton_Mod
       ; initial_root = -2.300000000
       ; iters = 5
       ; last_interv = None
       ; approx_root = -2.236067978
-      ; delta = 0.000000000
+      ; delta = 0.000000001
+      ; disc = 0.
       }
-    ; { meth = Bisect
+    ; { meth = Newton_Mod
       ; initial_root = 2.300000000
       ; iters = 5
       ; last_interv = None
       ; approx_root = 2.236067978
-      ; delta = 0.000000000
+      ; delta = 0.000000001
+      ; disc = 0.
+      }
+    ]
+  in
+  let () =
+    let () =
+      match res with
+      | [] -> Caml.Format.printf "No roots\n"
+      | lst -> lst |> Log.ans_list debug
+    in
+    expected_res |> Log.ans_list debug
+  in
+  Eq.ans_list res expected_res
+;;
+
+let%test "secant_test1" =
+  let () = Log.str "secant_test1:" in
+  let interval = { left_b = -2.400000; right_b = -2.200000 } in
+  let res = Eval.secant_step conf.f interval conf.epsilon in
+  let expected_res : answer =
+    { meth = Secant
+    ; initial_root = -2.300000000
+    ; iters = 5
+    ; last_interv = Some { left_b = -2.400000000; right_b = -2.236067975 }
+    ; approx_root = -2.236067977
+    ; delta = 0.000000002
+    ; disc = 0.
+    }
+  in
+  let () = Log.ans_list debug [ res ] in
+  let () = Log.ans_list debug [ expected_res ] in
+  Eq.ans res expected_res
+;;
+
+let%test "secant_method_test1" =
+  let () = Log.str "secant_method_test1:" in
+  let res = Eval.secant_method conf in
+  let expected_res : answer list =
+    [ { meth = Secant
+      ; initial_root = -2.300000000
+      ; iters = 5
+      ; last_interv = Some { left_b = -2.400000000; right_b = -2.236067975 }
+      ; approx_root = -2.236067977
+      ; delta = 0.000000002
+      ; disc = 0.
+      }
+    ; { meth = Secant
+      ; initial_root = 2.300000000
+      ; iters = 4
+      ; last_interv = Some { left_b = 2.200000000; right_b = 2.236067978 }
+      ; approx_root = 2.236067977
+      ; delta = 0.000000001
+      ; disc = 0.
       }
     ]
   in
