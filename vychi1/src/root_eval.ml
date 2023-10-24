@@ -1,6 +1,6 @@
 open Base
 
-let debug = false
+let debug = true
 
 type interval =
   { left_b : float
@@ -105,7 +105,7 @@ module Eval = struct
           None, curr_root, Float.abs (curr_root -. prev_root) /. 2.
         in
         last_interv, approx_root, delta, iters
-      | root -> loop f df epsilon root (iters + 1)
+      | curr_root -> loop f df epsilon curr_root (iters + 1)
     in
     let last_interv, approx_root, delta, iters = loop f df epsilon initial_root 0 in
     { meth = Newton; initial_root; iters; last_interv; approx_root; delta }
@@ -117,8 +117,36 @@ module Eval = struct
     |> List.map ~f:(fun interval -> newton_step conf.f conf.df interval conf.epsilon)
   ;;
 
-  let mod_newton_step = ()
-  let mod_newton_method = ()
+  let mod_newton_step f df interval epsilon =
+    let df =
+      match df with
+      | Some x -> x
+      | None ->
+        let exception No_derivative of string in
+        raise (No_derivative "No derivative for function was provided")
+    in
+    let initial_root = get_middle interval in
+    let rec loop f df epsilon prev_root initial_root iters =
+      match prev_root -. (f prev_root /. df initial_root) with
+      | curr_root when Float.abs (curr_root -. prev_root) <. epsilon ->
+        let last_interv, approx_root, delta =
+          None, curr_root, Float.abs (curr_root -. prev_root) /. 2.
+        in
+        last_interv, approx_root, delta, iters
+      | curr_root -> loop f df epsilon curr_root initial_root (iters + 1)
+    in
+    let last_interv, approx_root, delta, iters =
+      loop f df epsilon initial_root initial_root 0
+    in
+    { meth = Newton; initial_root; iters; last_interv; approx_root; delta }
+  ;;
+
+  let mod_newton_method conf =
+    let partition = root_separation conf.f conf.interval conf.split_count in
+    partition
+    |> List.map ~f:(fun interval -> mod_newton_step conf.f conf.df interval conf.epsilon)
+  ;;
+
   let secant_step = ()
   let secant_method = ()
 end

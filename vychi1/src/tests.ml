@@ -101,18 +101,67 @@ let%test "newton_method_test1" =
   let () = Log.str "newton_method_test1:" in
   let res = Eval.newton_method conf in
   let expected_res : answer list =
-    [ { meth = Bisect
+    [ { meth = Newton
       ; initial_root = -2.300000000
       ; iters = 3
       ; last_interv = None
       ; approx_root = -2.236067977
       ; delta = 0.000000000
       }
-    ; { meth = Bisect
+    ; { meth = Newton
       ; initial_root = 2.300000000
       ; iters = 3
       ; last_interv = None
       ; approx_root = 2.236067977
+      ; delta = 0.000000000
+      }
+    ]
+  in
+  let () =
+    let () =
+      match res with
+      | [] -> Caml.Format.printf "No roots\n"
+      | lst -> lst |> Log.ans_list debug
+    in
+    expected_res |> Log.ans_list debug
+  in
+  Eq.ans_list res expected_res
+;;
+
+let%test "mod_newton_test1" =
+  let () = Log.str "mod_newton_test1:" in
+  let interval = { left_b = -2.400000; right_b = -2.200000 } in
+  let res = Eval.mod_newton_step conf.f conf.df interval conf.epsilon in
+  let expected_res : answer =
+    { meth = Newton
+    ; initial_root = -2.300000000
+    ; iters = 5
+    ; last_interv = None
+    ; approx_root = -2.236067978
+    ; delta = 0.000000000
+    }
+  in
+  let () = Log.ans_list debug [ res ] in
+  let () = Log.ans_list debug [ expected_res ] in
+  Eq.ans res expected_res
+;;
+
+let%test "mod_newton_method_test1" =
+  let () = Log.str "mod_newton_method_test1:" in
+  let res = Eval.mod_newton_method conf in
+  let expected_res : answer list =
+    [ { meth = Bisect
+      ; initial_root = -2.300000000
+      ; iters = 5
+      ; last_interv = None
+      ; approx_root = -2.236067978
+      ; delta = 0.000000000
+      }
+    ; { meth = Bisect
+      ; initial_root = 2.300000000
+      ; iters = 5
+      ; last_interv = None
+      ; approx_root = 2.236067978
       ; delta = 0.000000000
       }
     ]
