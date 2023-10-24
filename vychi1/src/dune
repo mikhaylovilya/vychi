@@ -6,8 +6,13 @@
 (library
  (name root_eval)
  (libraries base)
+ (modules root_eval))
+
+(library
+ (name tests)
+ (modules tests)
+ (libraries base root_eval)
  (inline_tests)
- (modules root_eval)
  (preprocess
   (pps ppx_inline_test)))
 
