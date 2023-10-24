@@ -21,3 +21,6 @@
  (public_name vychi1)
  (modules main)
  (libraries root_eval base))
+
+(cram
+ (deps main.exe))

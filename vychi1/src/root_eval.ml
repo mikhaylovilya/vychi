@@ -155,6 +155,7 @@ module Eval = struct
   let secant_step f interval epsilon =
     let secant_left = interval.left_b in
     let secant_right = interval.right_b in
+    (* let open Float in *)
     let rec loop f secant_left secant_right epsilon iters =
       match
         secant_right
@@ -169,7 +170,7 @@ module Eval = struct
           , Float.abs (f approx_root) )
         in
         last_interv, approx_root, delta, iters, disc
-      | approx_root -> loop f secant_left approx_root epsilon (iters + 1)
+      | approx_root -> loop f secant_left approx_root epsilon Int.(iters + 1)
     in
     let last_interv, approx_root, delta, iters, disc =
       loop f secant_left secant_right epsilon 0
@@ -193,10 +194,10 @@ end
 module Log = struct
   let str text = if debug then Caml.Format.printf "%s\n" text
 
-  let interv_list debug (interval_list : interval list) =
+  let interv_list ?(msg = "Log.interv_list") debug (interval_list : interval list) =
     if debug
     then (
-      let _ = Caml.Format.printf "Log.interv_list: \n" in
+      let _ = Caml.Format.printf "%s: \n" msg in
       let _ =
         interval_list
         |> List.iter ~f:(fun ({ left_b; right_b } : interval) ->
@@ -224,10 +225,10 @@ module Log = struct
         answer.disc)
   ;;
 
-  let ans_list debug (answer_list : answer list) =
+  let ans_list ?(msg = "Log.ans_list") debug (answer_list : answer list) =
     if debug
     then (
-      let _ = Caml.Format.printf "Log.ans_list: \n" in
+      let _ = Caml.Format.printf "%s: \n" msg in
       let _ =
         answer_list
         |> List.iter ~f:(fun a ->
