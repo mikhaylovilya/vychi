@@ -15,16 +15,16 @@
    delta: 0.000000006; discrepancy: 0.000000022 
   
   Метод Ньютона: 
-    initial_root: -2.800000000; iterations: 15; last interval: None; approximate root: -2.680033837;
-   delta: 0.000000009; discrepancy: 0.000000015 
-    initial_root: 4.400000000; iterations: 22; last interval: None; approximate root: 4.461978392;
-   delta: 0.000000008; discrepancy: 0.000000038 
+    initial_root: -2.800000000; iterations: 3; last interval: None; approximate root: -2.680033835;
+   delta: 0.000000000; discrepancy: 0.000000000 
+    initial_root: 4.400000000; iterations: 3; last interval: None; approximate root: 4.461978401;
+   delta: 0.000000000; discrepancy: 0.000000000 
   
   Модифицированный метод Ньютона: 
-    initial_root: -2.800000000; iterations: 13; last interval: None; approximate root: -2.680033837;
-   delta: 0.000000008; discrepancy: 0.000000011 
-    initial_root: 4.400000000; iterations: 22; last interval: None; approximate root: 4.461978394;
-   delta: 0.000000006; discrepancy: 0.000000028 
+    initial_root: -2.800000000; iterations: 6; last interval: None; approximate root: -2.680033836;
+   delta: 0.000000005; discrepancy: 0.000000002 
+    initial_root: 4.400000000; iterations: 4; last interval: None; approximate root: 4.461978401;
+   delta: 0.000000001; discrepancy: 0.000000000 
   
   Метод секущих: 
     initial_root: -2.800000000; iterations: 9; last interval: (-3.200000000, -2.680033829); approximate root: -2.680033834;

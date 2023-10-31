@@ -14,8 +14,8 @@ let _ =
     (* f @@ Float.of_string arg |> Float.to_string |> Caml.print_endline *)
     let f x = (2. **. -.x) +. (0.5 *. (x **. 2.)) -. 10. in
     let (conf : conf) =
-      { f
-      ; df = Some (fun x -> 2. *. x)
+      { f (* ; df = Some (fun x -> 2. *. x) *)
+      ; df = Some (fun x -> -.(Float.log 2. *. (2. **. -.x)) +. x)
       ; interval = { left_b = a; right_b = b }
       ; split_count = n
       ; epsilon
