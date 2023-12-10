@@ -1,4 +1,14 @@
 (executable
  (name main)
  (public_name vychi2)
- (libraries))
+ (modules main)
+ (libraries core core_unix.command_unix vychi2lib))
+
+(library
+ (name vychi2lib)
+ ; (public_name interpolation)
+ (modules interpolation)
+ (libraries core)
+ (inline_tests)
+ (preprocess
+  (pps ppx_expect ppx_deriving.show)))
