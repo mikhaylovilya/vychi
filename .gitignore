@@ -30,3 +30,6 @@ setup.log
 _opam/
 
 vychi1/src/main.ipynb
+vychi2/src/f_data.txt
+vychi2/src/fpoly_plot.png
+vychi2/src/poly_data.txt
