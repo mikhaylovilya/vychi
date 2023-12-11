@@ -14,7 +14,7 @@ type conf =
   ; arg_val_pairs_count : int
   ; interval : interval
   ; table : table option
-  ; fx : float option
+  ; x : float option
   ; deg : int option
   }
 
@@ -56,36 +56,40 @@ let float_precision (f1 : float) (f2 : float) precision =
   else Float.equal f1 f2
 ;;
 
-let lagrange conf =
+let lagrange ~rev conf =
   let open Float in
-  let conftable, conffx, _ =
-    match conf.table, conf.fx, conf.deg with
+  let precision = 10 in
+  let conftable, confx, _ =
+    match conf.table, conf.x, conf.deg with
     | Some table, Some x, Some deg -> table, x, deg
     | _, _, _ -> failwith "\n"
   in
-  let fxi = proj_x conftable in
-  let approx_polyn fxi fx =
-    let term xk fxk fxi fx =
+  (* let xi = sort_xi confdeg confx conftable in *)
+  let xi = proj_x conftable in
+  let approx_polyn xi x =
+    let term fxk xk xi x =
       (List.filter_map
-         ~f:(fun fxi -> if float_precision fxi fxk 10 then None else Some (fx - fxi))
-         fxi
+         ~f:(fun xi -> if float_precision xi xk precision then None else Some (x - xi))
+         xi
        |> prod)
       / (List.filter_map
-           ~f:(fun fxi -> if float_precision fxi fxk 10 then None else Some (fxk - fxi))
-           fxi
+           ~f:(fun xi -> if float_precision xi xk precision then None else Some (xk - xi))
+           xi
          |> prod)
-      * xk
+      * fxk
     in
-    List.map conftable ~f:(fun (fxk, xk) -> term xk fxk fxi fx) |> sum
+    List.map conftable ~f:(fun (xk, fxk) -> term fxk xk xi x) |> sum
   in
-  ( approx_polyn fxi
-  , approx_polyn fxi conffx
-  , abs (conf.f (approx_polyn fxi conffx) - conffx) )
+  ( approx_polyn xi
+  , approx_polyn xi confx
+  , if rev
+    then abs (conf.f (approx_polyn xi confx) - confx)
+    else abs (conf.f confx - approx_polyn xi confx) )
 ;;
 
 let sort_table conf =
-  let conftable, conffx, confdeg =
-    match conf.table, conf.fx, conf.deg with
+  let conftable, confx, confdeg =
+    match conf.table, conf.x, conf.deg with
     | Some table, Some x, Some deg -> table, x, deg
     | _, _, _ -> failwith "\n"
   in
@@ -100,9 +104,9 @@ let sort_table conf =
     else -1
   in
   (* let xi = proj_x conftable in *)
-  let diffs = List.map ~f:(fun (fxi, xi) -> abs (conffx - fxi), fxi, xi) conftable in
+  let diffs = List.map ~f:(fun (xi, fxi) -> abs (confx - xi), xi, fxi) conftable in
   let sorted_diffs = List.sort ~compare diffs in
-  List.take (List.map ~f:(fun (_, fxi, xi) -> fxi, xi) sorted_diffs) Int.(confdeg + 1)
+  List.take (List.map ~f:(fun (_, xi, fxi) -> xi, fxi) sorted_diffs) Int.(confdeg + 1)
 ;;
 
 let inverse_table conf =
@@ -119,7 +123,7 @@ let dump_data workspace_path name func interval n =
   let data_path = String.concat ~sep:"" [ workspace_path; name; "_data.txt" ] in
   let oc = Out_channel.create data_path in
   let () =
-    { f = func; arg_val_pairs_count = n; interval; table = None; fx = None; deg = None }
+    { f = func; arg_val_pairs_count = n; interval; table = None; x = None; deg = None }
     |> table
     |> List.iter ~f:(fun (x, fx) ->
       let line = Printf.sprintf "%f %f\n" x fx in
