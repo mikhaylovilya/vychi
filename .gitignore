@@ -9,8 +9,9 @@
 *.cmxa
 
 # ocamlbuild working directory
-vychi1/_build/
-vychi2/_build/
+# vychi1/_build/
+# vychi2/_build/
+*/_build/
 
 # ocamlbuild targets
 *.byte
