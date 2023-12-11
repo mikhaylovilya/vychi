@@ -36,11 +36,11 @@ let workspace_path = "/home/cy/Desktop/ocaml-rep/vychi/vychi2/src/"
 let print_evaluation (conf : LI.Eval.conf) =
   let lagrange, discrepancy_l, delta_l = LI.Eval.lagrange conf in
   let newton, discrepancy_n, delta_n = LI.Eval.newton conf in
-  let n = 5000 in
   let () =
     Printf.printf "Lagrange: Discrepancy = %f\nDelta = %f\n" discrepancy_l delta_l
   in
   let () = Printf.printf "Newton: Discrepancy = %f\nDelta = %f\n" discrepancy_n delta_n in
+  let n = 5000 in
   let () = LI.Eval.dump_data workspace_path "lagrange" lagrange conf.interval n in
   let () = LI.Eval.dump_data workspace_path "newton" newton conf.interval n in
   let () = LI.Eval.dump_data workspace_path "f" conf.f conf.interval n in

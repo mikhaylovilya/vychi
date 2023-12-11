@@ -31,7 +31,7 @@ module Eval = struct
       else table
     in
     let cond_decreasing step x interval = x >= interval.left_b + step in
-    make_table conf (conf.interval.right_b - step) step (cond_decreasing step) []
+    make_table conf (conf.interval.right_b - step) step (cond_decreasing (step / 2.)) []
   ;;
 
   let sum terms = terms |> List.fold ~f:(fun acc x -> x +. acc) ~init:0.
@@ -50,7 +50,7 @@ module Eval = struct
 
   let float_precision f1 f2 precision =
     let open Float in
-    if abs (f1 -. f2) < 10. **. (-1. *. Int.to_float precision)
+    if abs (f1 - f2) < 10. ** (-1. * Int.to_float precision)
     then true (* let _ = Caml.print_endline "this way" in *)
     else Float.equal f1 f2
   ;;
@@ -84,6 +84,7 @@ module Eval = struct
 
   let lagrange conf =
     let open Float in
+    let precision = 10 in
     let conftable, confx, _ =
       match conf.table, conf.x, conf.deg with
       | Some table, Some x, Some deg -> table, x, deg
@@ -93,8 +94,14 @@ module Eval = struct
     let xi = proj_x conftable in
     let approx_polyn xi x =
       let term fxk xk xi x =
-        (List.filter_map ~f:(fun xi -> if xi = xk then None else Some (x - xi)) xi |> prod)
-        / (List.filter_map ~f:(fun xi -> if xi = xk then None else Some (xk - xi)) xi
+        (List.filter_map
+           ~f:(fun xi -> if float_precision xi xk precision then None else Some (x - xi))
+           xi
+         |> prod)
+        / (List.filter_map
+             ~f:(fun xi ->
+               if float_precision xi xk precision then None else Some (xk - xi))
+             xi
            |> prod)
         * fxk
       in
