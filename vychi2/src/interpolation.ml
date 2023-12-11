@@ -3,6 +3,7 @@ open Core
 module Eval = struct
   type f = float -> float [@@deriving show]
   type table = (float * float) list [@@deriving show]
+  type table_list = table list [@@deriving show]
 
   type interval =
     { left_b : float
@@ -83,12 +84,11 @@ module Eval = struct
 
   let lagrange conf =
     let open Float in
-    let conftable, confx, confdeg =
+    let conftable, confx, _ =
       match conf.table, conf.x, conf.deg with
       | Some table, Some x, Some deg -> table, x, deg
       | _, _, _ -> failwith "\n"
     in
-    let _ = confdeg in
     (* let xi = sort_xi confdeg confx conftable in *)
     let xi = proj_x conftable in
     let approx_polyn xi x =
@@ -103,21 +103,54 @@ module Eval = struct
     approx_polyn xi, approx_polyn xi confx, abs (conf.f confx - approx_polyn xi confx)
   ;;
 
-  (* let lagrange conf =
-     let open Float in
-     let conftable, confx, confdeg =
-     match conf.table, conf.x, conf.deg with
-     | Some table, Some x, Some deg -> table, x, deg
-     | _, _, _ -> failwith "\n"
-     in
-     let _ = confdeg in
-     (* let xi = sort_xi confdeg confx conftable in *)
-     let xi = proj_x conftable in
-     let approx_polyn xi x =
+  let segment_tables tables =
+    let rec helper tables acc =
+      match tables with
+      | [] -> []
+      | hd :: tl -> (hd :: acc) :: helper tl (hd :: acc)
+    in
+    helper tables []
+  ;;
 
-     in
-     approx_polyn xi, approx_polyn xi confx, abs (conf.f confx - approx_polyn xi confx)
-     ;; *)
+  let%expect_test "tables_test" =
+    let () = Printf.printf "%s\n" (show_table [ 1., 2.; 2., 4.; 3., 6. ]) in
+    let () =
+      Printf.printf "%s\n" (show_table_list (segment_tables [ 1., 2.; 2., 4.; 3., 6. ]))
+    in
+    [%expect {|[ [ 1., 2. ]; [ 1., 2.; 2., 4. ]; [ 1., 2.; 2., 4.; 3., 6. ] ]|}]
+  ;;
+
+  let newton conf =
+    let open Float in
+    let conftable, confx, _ =
+      match conf.table, conf.x, conf.deg with
+      | Some table, Some x, Some deg -> table, x, deg
+      | _, _, _ -> failwith "\n"
+    in
+    let approx_polyn table x =
+      let rec divided_difference table =
+        match table with
+        | [ (_, fx_0) ] -> fx_0
+        | list ->
+          let no_head = List.tl_exn list in
+          let no_last = List.drop_last_exn list in
+          let hd_x, _ = List.hd_exn list in
+          let lst_x, _ = List.last_exn list in
+          (divided_difference no_head - divided_difference no_last) / (lst_x - hd_x)
+      in
+      let term table_k x =
+        if Int.(List.length table_k = 1)
+        then divided_difference table_k
+        else
+          divided_difference table_k
+          * (List.map ~f:(fun (xk, _) -> x - xk) (List.drop_last_exn table_k) |> prod)
+      in
+      table |> segment_tables |> List.map ~f:(fun segm_tbl -> term segm_tbl x) |> sum
+    in
+    ( approx_polyn conftable
+    , approx_polyn conftable confx
+    , abs (conf.f confx - approx_polyn conftable confx) )
+  ;;
 
   let dump_data workspace_path name func interval n =
     (* let () = Core_unix.mkdir_p plot_path in *)
@@ -131,7 +164,7 @@ module Eval = struct
         let () = Out_channel.output_string oc line in
         Out_channel.flush oc)
     in
-    ()
+    Out_channel.close oc
   ;;
 
   let plot workspace_path name =

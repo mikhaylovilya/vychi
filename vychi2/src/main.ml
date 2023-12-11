@@ -34,12 +34,18 @@ let print_table (table : LI.Eval.table) = Printf.printf "%s\n" (LI.Eval.show_tab
 let workspace_path = "/home/cy/Desktop/ocaml-rep/vychi/vychi2/src/"
 
 let print_evaluation (conf : LI.Eval.conf) =
-  let poly, discrepancy, delta = LI.Eval.lagrange conf in
+  let lagrange, discrepancy_l, delta_l = LI.Eval.lagrange conf in
+  let newton, discrepancy_n, delta_n = LI.Eval.newton conf in
   let n = 5000 in
-  let () = Printf.printf "Discrepancy = %f\nDelta = %f\n" discrepancy delta in
-  let () = LI.Eval.dump_data workspace_path "poly" poly conf.interval n in
+  let () =
+    Printf.printf "Lagrange: Discrepancy = %f\nDelta = %f\n" discrepancy_l delta_l
+  in
+  let () = Printf.printf "Newton: Discrepancy = %f\nDelta = %f\n" discrepancy_n delta_n in
+  let () = LI.Eval.dump_data workspace_path "lagrange" lagrange conf.interval n in
+  let () = LI.Eval.dump_data workspace_path "newton" newton conf.interval n in
   let () = LI.Eval.dump_data workspace_path "f" conf.f conf.interval n in
-  let () = LI.Eval.plot_both workspace_path "f" "poly" in
+  let () = LI.Eval.plot_both workspace_path "f" "lagrange" in
+  let () = LI.Eval.plot_both workspace_path "f" "newton" in
   ()
 ;;
 
