@@ -8,7 +8,7 @@
  (name vychi2lib)
  ; (public_name interpolation)
  (modules interpolation)
- (libraries core)
+ (libraries core core_unix)
  (inline_tests)
  (preprocess
   (pps ppx_expect ppx_deriving.show)))

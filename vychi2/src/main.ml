@@ -30,19 +30,22 @@ let print_prereq () =
   Printf.printf "Задача алгебраического интерполирования\n (Вариант 12)\n"
 ;;
 
-let print_and_return_table (tbl_conf : LI.tbl_conf) =
-  let res = tbl_conf |> LI.Eval.table in
-  let () = Printf.printf "%s\n" (LI.show_table res) in
-  res
-;;
+let print_table (table : LI.Eval.table) = Printf.printf "%s\n" (LI.Eval.show_table table)
+let workspace_path = "/home/cy/Desktop/ocaml-rep/vychi/vychi2/src/"
 
-let print_evaluation (conf : LI.conf) =
-  let _ = conf in
+let print_evaluation (conf : LI.Eval.conf) =
+  let poly, discrepancy, delta = LI.Eval.lagrange conf in
+  let n = 5000 in
+  let () = Printf.printf "Discrepancy = %f\nDelta = %f\n" discrepancy delta in
+  let () = LI.Eval.dump_data workspace_path "poly" poly conf.interval n in
+  let () = LI.Eval.dump_data workspace_path "f" conf.f conf.interval n in
+  let () = LI.Eval.plot_both workspace_path "f" "poly" in
   ()
 ;;
 
 let eventloop func =
   let oc = Out_channel.stdout in
+  let ic = In_channel.stdin in
   let print_s s =
     let () = Printf.fprintf oc "%s: " s in
     Out_channel.flush oc
@@ -51,22 +54,44 @@ let eventloop func =
     let () = Printf.fprintf oc "%s?: " q in
     Out_channel.flush oc
   in
-  let ic = In_channel.stdin in
   let () = print_prereq () in
   let rec loop () =
     let () = print_s "Enter arg-val pairs count (m+1)" in
     let arg_val_pairs_count = In_channel.input_line_exn ic |> Int.of_string in
+    (*  *)
     let () = print_s "Enter left border of interval (a)" in
     let a = In_channel.input_line_exn ic |> Float.of_string in
+    (*  *)
     let () = print_s "Enter right border of interval (b)" in
     let b = In_channel.input_line_exn ic |> Float.of_string in
-    let interval : L.Interpolation.interval = { left_b = a; right_b = b } in
-    let _ = print_and_return_table { f = func; arg_val_pairs_count; interval } in
+    (*  *)
+    let interval : LI.Eval.interval = { left_b = a; right_b = b } in
+    let (conf : LI.Eval.conf) =
+      { f = func
+      ; arg_val_pairs_count
+      ; interval
+      ; table = None
+      ; x = Some 0.5
+      ; deg = Some 11
+      }
+    in
+    let table = LI.Eval.table conf in
+    let () = print_table table in
+    (*  *)
     let () = print_s "Enter interpolation point (x)" in
     let x = In_channel.input_line_exn ic |> Float.of_string in
+    (*  *)
     let () = print_s "Enter interpolation polynomial's degree (n)" in
-    let power = In_channel.input_line_exn ic |> Int.of_string in
-    let () = print_evaluation { f = func; arg_val_pairs_count; interval; x; power } in
+    let deg = In_channel.input_line_exn ic |> Int.of_string in
+    (*  *)
+    let conf = { conf with table = Some table; x = Some x; deg = Some deg } in
+    let new_table = LI.Eval.sort_table conf in
+    let () = print_table new_table in
+    let conf = { conf with table = Some new_table } in
+    let () =
+      try print_evaluation conf with
+      | Failure msg -> Printf.printf "%s\n" msg
+    in
     let () = print_q "Continue" in
     match In_channel.input_line_exn ic with
     | "no" | "No" | "n" -> ()
