@@ -1,0 +1,13 @@
+(executable
+ (name main)
+ (public_name vychi3)
+ (modules main)
+ (libraries core core_unix.command_unix vychi3lib))
+
+(library
+ (name vychi3lib)
+ (modules inv_interpolation num_differentiation)
+ (libraries core core_unix)
+ (inline_tests)
+ (preprocess
+  (pps ppx_expect ppx_deriving.show)))
