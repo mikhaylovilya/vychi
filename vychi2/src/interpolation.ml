@@ -145,14 +145,24 @@ module Eval = struct
           let lst_x, _ = List.last_exn list in
           (divided_difference no_head - divided_difference no_last) / (lst_x - hd_x)
       in
-      let term table_k x =
-        if Int.(List.length table_k = 1)
-        then divided_difference table_k
-        else
-          divided_difference table_k
-          * (List.map ~f:(fun (xk, _) -> x - xk) (List.drop_last_exn table_k) |> prod)
+      let rec helper table x =
+        match table with
+        | [ (_, fx_0) ] -> fx_0
+        | table ->
+          let table_k = List.drop_last_exn table in
+          (divided_difference table * (List.map ~f:(fun (xk, _) -> x - xk) table_k |> prod)
+          )
+          + helper table_k x
       in
-      table |> segment_tables |> List.map ~f:(fun segm_tbl -> term segm_tbl x) |> sum
+      helper table x
+      (* let term table_k x =
+         if Int.(List.length table_k = 1)
+         then divided_difference table_k
+         else
+         divided_difference table_k
+         * (List.map ~f:(fun (xk, _) -> x - xk) (List.drop_last_exn table_k) |> prod)
+         in
+         table |> segment_tables |> List.map ~f:(fun segm_tbl -> term segm_tbl x) |> sum *)
     in
     ( approx_polyn conftable
     , approx_polyn conftable confx
