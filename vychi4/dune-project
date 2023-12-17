@@ -1,0 +1,27 @@
+(lang dune 3.10)
+
+(name vychi4)
+
+(generate_opam_files true)
+
+(source
+ (github mikhaylovilya/vychi))
+
+(authors "Ilya Mikhaylov")
+
+(maintainers "Ilya Mikhaylov")
+
+(license MIT)
+
+(documentation https://github.com/mikhaylovilya/vychi/blob/main/README.md)
+
+(package
+ (name vychi4)
+ (synopsis
+  "Code for homework assignments in course \"Methods of Computation and Computational Workshop\"")
+ (description
+  "Code for homework assignments in course \"Methods of Computation and Computational Workshop\"")
+ (depends ocaml dune core core_unix ppx_expect ppx_deriving)
+ (tags (ocaml)))
+
+; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project
