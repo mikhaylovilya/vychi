@@ -4,9 +4,15 @@
    (:standard -w -3-32))))
 
 (executable
- (name main)
- (public_name vychi3)
- (modules main)
+ (name inter_cli)
+ (public_name vychi3_inter_cli)
+ (modules inter_cli)
+ (libraries core core_unix.command_unix vychi3lib))
+
+(executable
+ (name diff_cli)
+ (public_name vychi3_diff_cli)
+ (modules diff_cli)
  (libraries core core_unix.command_unix vychi3lib))
 
 (library

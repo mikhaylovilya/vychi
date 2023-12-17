@@ -4,13 +4,15 @@ type f = float -> float [@@deriving show]
 type table = (float * float) list [@@deriving show]
 (* type table_list = table list [@@deriving show] *)
 
-type interval =
+(* type interval =
   { left_b : float
   ; right_b : float
-  }
+  } *)
+
+type interval = Root_eval.interval
 
 type conf =
-  { f : float -> float
+  { f : f
   ; arg_val_pairs_count : int
   ; interval : interval
   ; table : table option
@@ -29,7 +31,7 @@ let table (conf : conf) =
     then make_table conf (x - step) step cond ((x, conf.f x) :: table)
     else table
   in
-  let cond_decreasing step x interval = x > interval.left_b + step in
+  let cond_decreasing step x (interval : interval) = x > interval.left_b + step in
   make_table conf (conf.interval.right_b - step) step (cond_decreasing (step / 2.)) []
 ;;
 
@@ -56,7 +58,7 @@ let float_precision (f1 : float) (f2 : float) precision =
   else Float.equal f1 f2
 ;;
 
-let lagrange ~rev conf =
+let lagrange ~inv conf =
   let open Float in
   let precision = 10 in
   let conftable, confx, _ =
@@ -82,7 +84,7 @@ let lagrange ~rev conf =
   in
   ( approx_polyn xi
   , approx_polyn xi confx
-  , if rev
+  , if inv
     then abs (conf.f (approx_polyn xi confx) - confx)
     else abs (conf.f confx - approx_polyn xi confx) )
 ;;

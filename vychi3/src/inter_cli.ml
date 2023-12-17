@@ -1,19 +1,11 @@
 open Core
 module V = Vychi3lib
 module VI = Vychi3lib.Inv_interpolation
-module VD = Vychi3lib.Num_differentiation
 
 let workspace_path = "/home/cy/Desktop/ocaml-rep/vychi/vychi3/src/"
 
-let print_prereq () =
-  Printf.printf
-    "Задача обратного интерполирования 3.1\n\
-     Задача численного дифференцирования 3.2\n\
-     (Вариант 12)\n"
-;;
-
 let print_evaluation_rev conf =
-  let lagrange, p_fx, delta_l = VI.lagrange ~rev:true conf in
+  let lagrange, p_fx, delta_l = VI.lagrange ~inv:true conf in
   let () =
     Printf.printf "Lagrange:P_n(f(x)) = %f\n|f(P_n(f(x))) - f(x)| = %f\n" p_fx delta_l
   in
@@ -32,7 +24,7 @@ let print_evaluation (conf : VI.conf) eps =
     | Some table, Some x, Some deg -> table, x, deg
     | _, _, _ -> failwith "\n"
   in
-  let lagrange, discrepancy, delta = VI.lagrange ~rev:false conf in
+  let lagrange, discrepancy, delta = VI.lagrange ~inv:false conf in
   let _, _ = discrepancy, delta in
   let equation x = lagrange x - confx in
   (* let () = Printf.printf "Lagrange:Discrepancy = %f\nDelta = %f\n" discrepancy delta in *)
@@ -52,6 +44,9 @@ let print_evaluation (conf : VI.conf) eps =
 let eventloop func =
   let oc = Out_channel.stdout in
   let ic = In_channel.stdin in
+  let print_prereq () =
+    Printf.printf "Задача обратного интерполирования 3.1\n(Вариант 12)\n"
+  in
   let print_s s =
     let () = Printf.fprintf oc "%s: " s in
     Out_channel.flush oc
@@ -114,3 +109,7 @@ let () =
   let f x = exp (-x) - ((x ** 2.) / 2.) in
   eventloop f
 ;;
+(* else (
+   let k = 3. in
+   let f x = exp (1.5 * k * x) in
+   eventloop_differentiation f) *)
