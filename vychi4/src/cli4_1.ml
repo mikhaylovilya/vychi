@@ -1,7 +1,7 @@
 open Core
 module QF = Vychi4lib.Quadrature_formulas
 
-let print_ans_list conf =
+let print_ans_list (conf : QF.qf_conf) =
   let open QF in
   let open Float in
   let meth_list =
