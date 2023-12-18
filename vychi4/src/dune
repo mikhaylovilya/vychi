@@ -1,3 +1,13 @@
 (executable
- (name main)
- (public_name vychi4))
+ (name cli4_1)
+ (public_name vychi4_cli4_1)
+ (modules cli4_1)
+ (libraries core core_unix.command_unix vychi4lib))
+
+(library
+ (name vychi4lib)
+ (modules quadrature_formulas)
+ (libraries core core_unix)
+ (inline_tests)
+ (preprocess
+  (pps ppx_expect ppx_deriving.show)))
