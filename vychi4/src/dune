@@ -4,6 +4,18 @@
  (modules cli4_1)
  (libraries core core_unix.command_unix vychi4lib))
 
+(executable
+ (name cli4_2)
+ (public_name vychi4_cli4_2)
+ (modules cli4_2)
+ (libraries core core_unix.command_unix vychi4lib))
+
+(executable
+ (name cli4_3)
+ (public_name vychi4_cli4_3)
+ (modules cli4_3)
+ (libraries core core_unix.command_unix vychi4lib))
+
 (library
  (name vychi4lib)
  (modules quadrature_formulas)
