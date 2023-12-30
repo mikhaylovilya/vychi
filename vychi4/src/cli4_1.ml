@@ -15,7 +15,7 @@ let print_ans_list (conf : QF.qf_conf) =
   in
   let () =
     Printf.printf
-      "function : %s\nanalytical result = %f\n\n"
+      "Функция : %s\nТочное значение интеграла = %f\n\n"
       conf.f_str
       (conf.integral conf.interval)
   in
@@ -30,7 +30,8 @@ let print_ans_list (conf : QF.qf_conf) =
       | _ -> abs (initial_result - result) / abs initial_result
     in
     let ans = { meth; result; abs_discrepancy; relative_discrepancy } in
-    ans |> print_qf_ans)
+    let () = ans |> print_qf_ans in
+    Printf.printf "\n")
 ;;
 
 let eventloop func_list =
@@ -50,12 +51,13 @@ let eventloop func_list =
   in
   let () = print_prereq () in
   let rec loop () =
-    let () = print_s "Enter the interval of integration (a)" in
+    let () = print_s "Введите границу интегрирования (a)" in
     let a = In_channel.input_line_exn ic |> Float.of_string in
     (*  *)
-    let () = print_s "Enter the interval of integration (b)" in
+    let () = print_s "Введите границу интегрирования (b)" in
     let b = In_channel.input_line_exn ic |> Float.of_string in
     (*  *)
+    let () = Printf.printf "\n" in
     let interval : QF.interval = { left_b = a; right_b = b } in
     let () =
       func_list
@@ -63,7 +65,7 @@ let eventloop func_list =
         let (conf : QF.qf_conf) = { f; f_str; integral; interval } in
         print_ans_list conf)
     in
-    let () = print_q "Continue" in
+    let () = print_q "Продолжить (y/n)" in
     match In_channel.input_line_exn ic with
     | "no" | "No" | "n" -> ()
     | "yes" | "Yes" | "y" -> loop ()
@@ -76,10 +78,10 @@ let () =
   let open Float in
   let open QF in
   (* let df x = (-1. * sin x) - 2. in *)
-  let f x = cos x - (2. * x) in
+  let f x = (3. * sin x) - (0.5 * (x ** 2.)) in
   let integral_f interval =
     let a, b = interval.left_b, interval.right_b in
-    sin b - sin a + (a * a) - (b * b)
+    1. / 6. * ((18. * cos a) - (18. * cos b) + (a * a * a) - (b * b * b))
   in
   let f_0 x =
     let _ = x in
@@ -105,7 +107,7 @@ let () =
     (b ** 4.) - (a ** 4.)
   in
   let func_list =
-    [ f, integral_f, "f(x) = cos(x) - (2 * x)"
+    [ f, integral_f, "f(x) = 3sin(x) - 1/2 * x^2"
     ; f_0, integral_f_0, "f(x) = 1"
     ; f_1, integral_f_1, "f(x) = 2 * x"
     ; f_2, integral_f_2, "f(x) = 3 * (x ** 2)"

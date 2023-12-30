@@ -12,7 +12,16 @@ type meth =
   | Trapezoid_Method
   | Simpsons_Method
   | Three_Eights_Method
-[@@deriving show { with_path = false }]
+(* [@@deriving show { with_path = false }] *)
+
+let print_meth = function
+  | Left_Rect_Method -> "КФ левого прямоугольника"
+  | Right_Rect_Method -> "КФ правого прямоугольника"
+  | Mid_Rect_Method -> "КФ среднего прямоугольника"
+  | Trapezoid_Method -> "КФ трапеции"
+  | Simpsons_Method -> "КФ Симпсона"
+  | Three_Eights_Method -> "Формула 3/8"
+;;
 
 type c_meth =
   | Compound_Left_Rect_Method
@@ -20,7 +29,15 @@ type c_meth =
   | Compound_Mid_Rect_Method
   | Compound_Trapezoid_Method
   | Compound_Simpsons_Method
-[@@deriving show { with_path = false }]
+(* [@@deriving show { with_path = false }] *)
+
+let print_c_meth = function
+  | Compound_Left_Rect_Method -> "СКФ левого прямоугольника"
+  | Compound_Right_Rect_Method -> "СКФ правого прямоугольника"
+  | Compound_Mid_Rect_Method -> "СКФ среднего прямоугольника"
+  | Compound_Trapezoid_Method -> "СКФ трапеции"
+  | Compound_Simpsons_Method -> "СКФ Симпсона"
+;;
 
 type qf_conf =
   { f : float -> float
@@ -56,21 +73,25 @@ type cqf_ans =
 
 let print_qf_ans (qf_ans : qf_ans) =
   Printf.printf
-    "meth = %s\nresult = %f\nabs_discrepancy = %f\nrelative_discrepancy = %f\n\n"
-    (show_meth qf_ans.meth)
+    "Метод : %s\n\
+     Значение интеграла по данной КФ = %f\n\
+     Абсолютная фактическая погрешность = %f\n"
+    (print_meth qf_ans.meth)
     qf_ans.result
     qf_ans.abs_discrepancy
-    qf_ans.relative_discrepancy
 ;;
 
 let print_cqf_ans (cqf_ans : cqf_ans) =
   Printf.printf
-    "meth = %s\nresult = %f\nabs_discrepancy = %f\nrelative_discrepancy = %f\n"
-    (show_c_meth cqf_ans.c_meth)
+    "Метод : %s\n\
+     Значение интеграла по данной КФ = %f\n\
+     Абсолютная фактическая погрешность = %f\n"
+    (print_c_meth cqf_ans.c_meth)
     cqf_ans.result
     cqf_ans.abs_discrepancy
-    cqf_ans.relative_discrepancy
 ;;
+
+(* Относительная фактическая погрешность  = %f\n *)
 
 let left_rect_meth (qf_conf : qf_conf) =
   let open Float in

@@ -14,7 +14,7 @@ let print_ans_list ~theor_disc_flag (conf : QF.cqf_conf) =
   in
   let () =
     Printf.printf
-      "function : %s\nanalytical result = %f\n\n"
+      "Функция : %s\nТочное значение интеграла = %f\n\n"
       conf.f_str
       (conf.integral conf.interval)
   in
@@ -41,7 +41,7 @@ let print_ans_list ~theor_disc_flag (conf : QF.cqf_conf) =
         |> List.last_exn
       in
       let th_discrepancy = const * max * (b - a) * (h ** of_int Int.(ast + 1)) in
-      Printf.printf "Theoretical discrepancy = %f\n\n" th_discrepancy)
+      Printf.printf "Теоритическая оценка погрешности = %f\n\n" th_discrepancy)
     else Printf.printf "\n\n")
 ;;
 
@@ -63,15 +63,16 @@ let eventloop func_list =
   in
   let () = print_prereq () in
   let rec loop () =
-    let () = print_s "Enter the interval of integration (a)" in
+    let () = print_s "Введите границу интегрироваания (a)" in
     let a = In_channel.input_line_exn ic |> Float.of_string in
     (*  *)
-    let () = print_s "Enter the interval of integration (b)" in
+    let () = print_s "Введите границу интегрирования (b)" in
     let b = In_channel.input_line_exn ic |> Float.of_string in
     (*  *)
-    let () = print_s "Enter partition rate (m)" in
+    let () = print_s "Введите число промежутков деления [a, b] (m)" in
     let m = In_channel.input_line_exn ic |> Int.of_string in
     let h = (b -. a) /. Float.of_int m in
+    let () = Printf.printf "\n" in
     (*  *)
     let interval : QF.interval = { left_b = a; right_b = b } in
     let () =
@@ -85,7 +86,7 @@ let eventloop func_list =
         else print_ans_list ~theor_disc_flag:false conf)
     in
     (* let _ = m, interval, func_list, print_ans_list in *)
-    let () = print_q "Continue" in
+    let () = print_q "Продолжить(y/n)" in
     match In_channel.input_line_exn ic with
     | "no" | "No" | "n" -> ()
     | "yes" | "Yes" | "y" -> loop ()
@@ -98,10 +99,10 @@ let () =
   let open Float in
   let open QF in
   (* let df x = (-1. * sin x) - 2. in *)
-  let f x = cos x - (2. * x) in
+  let f x = (3. * sin x) - (0.5 * (x ** 2.)) in
   let integral_f interval =
     let a, b = interval.left_b, interval.right_b in
-    sin b - sin a + (a * a) - (b * b)
+    1. / 6. * ((18. * cos a) - (18. * cos b) + (a * a * a) - (b * b * b))
   in
   let f_0 x =
     let _ = x in
@@ -137,7 +138,7 @@ let () =
     0.
   in
   let func_list =
-    [ f, integral_f, "f(x) = cos(x) - (2 * x)", []
+    [ f, integral_f, "f(x) = 3sin(x) - 1/2 * x^2", []
     ; f_0, integral_f_0, "f(x) = 1", []
     ; f_1, integral_f_1, "f(x) = 2 * x", []
     ; f_2, integral_f_2, "f(x) = 3 * (x ** 2)", []
