@@ -9,11 +9,13 @@ let print_evaluation_rev conf =
   let () =
     Printf.printf "Lagrange:P_n(f(x)) = %f\n|f(P_n(f(x))) - f(x)| = %f\n" p_fx delta_l
   in
+  let () = Out_channel.flush Stdlib.stdout in
   (* let _ = lagrange in *)
   let n = 5000 in
   let () = VI.dump_data workspace_path "lagrange" lagrange conf.interval n in
   let () = VI.dump_data workspace_path "f" conf.f conf.interval n in
   let () = VI.plot_both workspace_path "f" "lagrange" in
+  let _ = lagrange in
   ()
 ;;
 
@@ -38,22 +40,22 @@ let print_evaluation (conf : VI.conf) eps =
   in
   let ans = V.Root_eval.Eval.secant_method root_conf in
   let () = V.Root_eval.Log.ans_list ~msg:"Roots" true ans in
+  let () = Out_channel.flush Out_channel.stdout in
   ()
 ;;
 
 let eventloop func =
-  let oc = Out_channel.stdout in
   let ic = In_channel.stdin in
   let print_prereq () =
     Printf.printf "Задача обратного интерполирования 3.1\n(Вариант 12)\n"
   in
   let print_s s =
-    let () = Printf.fprintf oc "%s: " s in
-    Out_channel.flush oc
+    let () = Printf.fprintf Out_channel.stdout "%s: " s in
+    Out_channel.flush Out_channel.stdout
   in
   let print_q q =
-    let () = Printf.fprintf oc "%s?: " q in
-    Out_channel.flush oc
+    let () = Printf.fprintf Out_channel.stdout "%s?: " q in
+    Out_channel.flush Out_channel.stdout
   in
   let () = print_prereq () in
   let rec loop () =
@@ -93,7 +95,7 @@ let eventloop func =
     let eps = In_channel.input_line_exn ic |> Float.of_string in
     let () =
       try print_evaluation conf eps with
-      | Failure msg -> Printf.printf "%s\n" msg
+      | Failure msg -> Printf.printf "%sFailure" msg
     in
     let () = print_q "Continue" in
     match In_channel.input_line_exn ic with
