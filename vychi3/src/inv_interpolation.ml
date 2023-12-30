@@ -128,7 +128,7 @@ let dump_data workspace_path name func interval n =
     { f = func; arg_val_pairs_count = n; interval; table = None; x = None; deg = None }
     |> table
     |> List.iter ~f:(fun (x, fx) ->
-      let line = Printf.sprintf "%f %f\n" x fx in
+      let line = Printf.sprintf "%f %f\n" fx x in
       let () = Out_channel.output_string oc line in
       Out_channel.flush oc)
   in
