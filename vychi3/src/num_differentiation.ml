@@ -78,14 +78,14 @@ let make_ans conf =
         , List.nth_exn conftable Int.(i + 1)
         , List.nth_exn conftable Int.(i + 2) )
       in
-      ((-3. * f_x) + (4. * f_xr) - f_xrr) / 2. * h
+      ((-3. * f_x) + (4. * f_xr) - f_xrr) / (2. * h)
     | n when Int.( = ) n Int.(List.length conf_table - 1) ->
       let (_, f_x), (_, f_xl), (_, f_xll) =
         ( List.nth_exn conftable i
         , List.nth_exn conftable Int.(i - 1)
         , List.nth_exn conftable Int.(i - 2) )
       in
-      ((3. * f_x) - (4. * f_xl) + f_xll) / 2. * h
+      ((3. * f_x) - (4. * f_xl) + f_xll) / (2. * h)
     | _ ->
       let (_, f_xl), (_, f_xr) =
         List.nth_exn conftable Int.(i - 1), List.nth_exn conftable Int.(i + 1)
