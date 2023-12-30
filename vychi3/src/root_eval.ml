@@ -1,4 +1,4 @@
-open Base
+open Core
 
 let debug = false
 
@@ -192,29 +192,30 @@ module Eval = struct
 end
 
 module Log = struct
-  let str text = if debug then Caml.Format.printf "%s\n" text
+  let str text = if debug then Printf.printf "%s\n" text
 
   let interv_list ?(msg = "Log.interv_list") debug (interval_list : interval list) =
     if debug
     then (
-      let _ = Caml.Format.printf "%s: \n" msg in
+      let _ = Printf.printf "%s: \n" msg in
       let _ =
         interval_list
         |> List.iter ~f:(fun ({ left_b; right_b } : interval) ->
-          Caml.Format.printf "  (%.9f, %.9f)\n" left_b right_b)
+          Printf.printf "  (%.9f, %.9f)\n" left_b right_b)
       in
-      Caml.Format.printf "\n")
+      Printf.printf "\n")
   ;;
 
   let ans debug (answer : answer) =
+    let () = Printf.printf "ya ebanutyi?\n" in
     if debug
     then (
       let last_interv_log =
         match answer.last_interv with
         | None -> "None"
-        | Some interv -> Caml.Format.sprintf "(%.9f, %.9f)" interv.left_b interv.right_b
+        | Some interv -> Printf.sprintf "(%.9f, %.9f)" interv.left_b interv.right_b
       in
-      Caml.Format.printf
+      Printf.printf
         "initial_root: %.9f; iterations: %d; last interval: %s; approximate root: %.9f;\n\
         \ delta: %.9f; discrepancy: %.9f \n"
         answer.initial_root
@@ -228,14 +229,14 @@ module Log = struct
   let ans_list ?(msg = "Log.ans_list") debug (answer_list : answer list) =
     if debug
     then (
-      let _ = Caml.Format.printf "%s: \n" msg in
+      let _ = Printf.printf "%s: \n" msg in
       let _ =
         answer_list
         |> List.iter ~f:(fun a ->
-          let _ = Caml.Format.printf "  " in
+          let _ = Printf.printf "  " in
           ans true a)
       in
-      Caml.Format.printf "\n")
+      Printf.printf "\n")
   ;;
 end
 
